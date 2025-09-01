@@ -10,7 +10,6 @@ import {
   ListItem,
   ListItemText,
   Box,
-  CircularProgress,
 } from "@mui/material";
 import SportsSoccerIcon from "@mui/icons-material/SportsSoccer";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -23,15 +22,13 @@ import { API_BASE_URL } from "../utils/api";
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout, isLoading } = useAuth0();
-
+  const { user, isAuthenticated, logout } = useAuth0();
   const [role, setRole] = useState(null);
   const [open, setOpen] = useState(false);
-  const [loadingRole, setLoadingRole] = useState(true);
 
   useEffect(() => {
     const fetchRole = async () => {
-      if (isAuthenticated && user?.email) {
+      if (user) {
         try {
           const res = await axios.get(
             `${API_BASE_URL}/api/users/${encodeURIComponent(user.email)}`
@@ -39,28 +36,13 @@ const Navbar = () => {
           setRole(res.data.role);
         } catch (err) {
           console.error("❌ Error fetching role:", err);
-        } finally {
-          setLoadingRole(false);
         }
-      } else {
-        setLoadingRole(false);
       }
     };
     fetchRole();
-  }, [isAuthenticated, user]);
+  }, [user]);
 
   const toggleDrawer = (state) => () => setOpen(state);
-
-  // 🔹 Show spinner until both auth + role loaded
-  if (isLoading || loadingRole) {
-    return (
-      <AppBar position="sticky" sx={{ bgcolor: "#1e3c72" }}>
-        <Toolbar sx={{ justifyContent: "center" }}>
-          <CircularProgress size={28} sx={{ color: "white" }} />
-        </Toolbar>
-      </AppBar>
-    );
-  }
 
   // ✅ Nav items strictly by role
   let navItems = [{ label: "Home", path: "/" }];
@@ -72,13 +54,13 @@ const Navbar = () => {
     navItems.push({ label: "Owner Dashboard", path: "/ownerdashboard" });
   }
   if (role === "user") {
-    navItems.push({ label: "Dashboard", path: "/userdashboard" });
+    navItems.push({ label: "Dashboard", path: "/dashboard" });
     navItems.push({ label: "Cart", path: "/cart" });
     navItems.push({ label: "My Bookings", path: "/mybookings" });
   }
 
-  // 🔹 Ensure Landing Page always shows Dashboard button → redirect to userdashboard
-  if (location.pathname === "/") {
+  // 🔹 Always show Dashboard on Landing Page (redirects user-specific)
+  if (location.pathname === "/" ) {
     navItems.push({ label: "Dashboard", path: "/userdashboard" });
   }
 
@@ -175,7 +157,10 @@ const Navbar = () => {
             p: 2,
           }}
         >
-          <IconButton sx={{ color: "white", mb: 2 }} onClick={toggleDrawer(false)}>
+          <IconButton
+            sx={{ color: "white", mb: 2 }}
+            onClick={toggleDrawer(false)}
+          >
             <CloseIcon />
           </IconButton>
           <List>
@@ -211,7 +196,10 @@ const Navbar = () => {
                   mt: 2,
                 }}
               >
-                <ListItemText primary="Logout" primaryTypographyProps={{ fontWeight: "600" }} />
+                <ListItemText
+                  primary="Logout"
+                  primaryTypographyProps={{ fontWeight: "600" }}
+                />
               </ListItem>
             )}
           </List>
@@ -222,3 +210,5 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+

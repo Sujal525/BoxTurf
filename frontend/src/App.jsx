@@ -6,19 +6,18 @@ import { API_BASE_URL } from "./utils/api";
 
 import Navbar from "./components/Navbar";
 import LandingPage from "./pages/LandingPage";
-import Dashboard from "./pages/Dashboard"; // Admin Dashboard
+import Dashboard from "./pages/Dashboard";
 import UserDashboard from "./pages/UserDashboard";
 import UserPayment from "./pages/UserPayment";
 import MyBookings from "./pages/MyBookings";
 import UserCart from "./pages/UserCart";
-import OwnerDashboard from "./pages/OwnerDashboard";
+import OwnerDashboard from "./pages/OwnerDashboard";  // ✅ import
 
 function App() {
-  const { isAuthenticated, user, isLoading } = useAuth0();
+  const { isAuthenticated, user } = useAuth0();
   const navigate = useNavigate();
   const location = useLocation();
   const [role, setRole] = useState(null);
-  const [loadingRole, setLoadingRole] = useState(true);
 
   useEffect(() => {
     const saveUser = async () => {
@@ -35,40 +34,43 @@ function App() {
           });
 
           setRole(storedRole);
+
+          if (location.pathname === "/") {
+            navigate("/dashboard");
+          }
         } catch (err) {
           console.error("❌ Error saving user:", err);
-        } finally {
-          setLoadingRole(false);
         }
-      } else {
-        setLoadingRole(false);
       }
     };
 
     saveUser();
-  }, [isAuthenticated, user]);
-
-  if (isLoading || loadingRole) {
-    return <div>Loading...</div>; // spinner if you want
-  }
+  }, [isAuthenticated, user, navigate, location.pathname]);
 
   return (
     <>
       <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
-
-        {/* ✅ Admin Side */}
-        <Route path="/dashboard" element={role === "admin" ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/dashboard" element={<Dashboard />} />
 
         {/* ✅ User Side */}
-        <Route path="/userdashboard" element={role === "user" ? <UserDashboard /> : <Navigate to="/" />} />
-        <Route path="/userpayment/:id" element={role === "user" ? <UserPayment /> : <Navigate to="/" />} />
-        <Route path="/mybookings" element={role === "user" ? <MyBookings /> : <Navigate to="/" />} />
-        <Route path="/cart" element={role === "user" ? <UserCart /> : <Navigate to="/" />} />
+        <Route path="/userdashboard" element={<UserDashboard />} />
+        <Route path="/userpayment/:id" element={<UserPayment />} />
+        <Route
+          path="/mybookings"
+          element={role === "user" ? <MyBookings /> : <Navigate to="/dashboard" />}
+        />
+        <Route
+          path="/cart"
+          element={role === "user" ? <UserCart /> : <Navigate to="/dashboard" />}
+        />
 
         {/* ✅ Owner Side */}
-        <Route path="/ownerdashboard" element={role === "owner" ? <OwnerDashboard /> : <Navigate to="/" />} />
+        <Route
+          path="/ownerdashboard"
+          element={role === "owner" ? <OwnerDashboard /> : <Navigate to="/dashboard" />}
+        />
       </Routes>
     </>
   );
