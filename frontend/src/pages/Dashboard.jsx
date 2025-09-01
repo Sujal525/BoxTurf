@@ -12,7 +12,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
 
   // ✅ Fetch admin email from environment variable
-  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || process.env.REACT_APP_ADMIN_EMAIL;
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 
   useEffect(() => {
     const fetchRole = async () => {
