@@ -11,6 +11,9 @@ const Dashboard = () => {
   const [role, setRole] = useState(null);
   const [error, setError] = useState(null);
 
+  // ✅ Fetch admin email from environment variable
+  const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || process.env.REACT_APP_ADMIN_EMAIL;
+
   useEffect(() => {
     const fetchRole = async () => {
       if (user) {
@@ -20,8 +23,8 @@ const Dashboard = () => {
           );
           const fetchedRole = res.data.role;
 
-          // ✅ Restrict admin to one fixed email
-          if (fetchedRole === "admin" && user.email !== "sujaldhruve@gmail.com") {
+          // ✅ Restrict admin to env email
+          if (fetchedRole === "admin" && user.email !== ADMIN_EMAIL) {
             setError("Invalid email for admin login.");
             setRole(null);
             return;
@@ -35,7 +38,7 @@ const Dashboard = () => {
       }
     };
     fetchRole();
-  }, [user]);
+  }, [user, ADMIN_EMAIL]);
 
   if (error) {
     return (
